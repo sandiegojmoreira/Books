@@ -1,0 +1,9 @@
+ApiMain.class
+Book$LocalDateTimeDeserializer.class
+Response.class
+BookService.class
+Book$LocalDateTimeSerializer.class
+MongoBookRepository.class
+BookRepository.class
+Book.class
+CliMain.class

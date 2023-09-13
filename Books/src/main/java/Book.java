@@ -1,9 +1,22 @@
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 public class Book implements Comparable<Book> {
 
@@ -14,11 +27,7 @@ public class Book implements Comparable<Book> {
 	private LocalDateTime publicationDate;
 	private String genre;
 
-	// Static TreeSet to store all books
-	private static TreeSet<Book> bookDatabase = new TreeSet<>();
-
 	public Book(String isbn, String title, String author, Double price, LocalDateTime publicationDate, String genre) {
-		System.out.println("New book generated.");
 		if (isValidIsbn(isbn) && isValidTitle(title) && isValidAuthor(author) && isValidPrice(price)
 				&& isValidPublicationDate(publicationDate) && isValidGenre(genre)) {
 
@@ -35,26 +44,16 @@ public class Book implements Comparable<Book> {
 
 	}
 
-	private Book(String isbn) {
-		System.out.println("New book generated.");
-		if (isValidIsbn(isbn)) {
-			this.isbn = isbn;
-		} else {
-			throw new IllegalArgumentException("Invalid attributes provided");
-		}
+	public Book(String title, String author, Double price, LocalDateTime publicationDate, String genre) {
 
-	}
+		// JM - Constructor usado para deserializar.
+		this.isbn = "";
+		this.title = title;
+		this.author = author;
+		this.price = price;
+		this.publicationDate = publicationDate;
+		this.genre = genre;
 
-	public static Book search(String isbnTarget) {
-		// Using floor to find the exact book with matching ISBN
-		Book targetBook = new Book(isbnTarget);
-		Book floorBook = bookDatabase.floor(targetBook);
-		if (floorBook != null && floorBook.equals(targetBook)) {
-			System.out.println("Found book with ISBN: " + floorBook.toString());
-			return floorBook;
-		} else {
-			throw new IllegalArgumentException("No book found with matching ISBN");
-		}
 	}
 
 	public String getIsbn() {
@@ -137,6 +136,18 @@ public class Book implements Comparable<Book> {
 		return price != null && price >= 0;
 	}
 
+	public static LocalDateTime changePublicationDateType(String publicationDateString) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+		LocalDateTime publicationDate = null;
+		try {
+			publicationDate = LocalDateTime.parse(publicationDateString, formatter);
+			return publicationDate;
+		} catch (DateTimeParseException e) {
+			// System.out.println(e.getMessage());
+			return null;
+		}
+	}
+
 	private boolean isValidPublicationDate(LocalDateTime date) {
 		return date != null; // Example validation: Date is in the past
 	}
@@ -160,25 +171,6 @@ public class Book implements Comparable<Book> {
 		return validGenres.contains(genre);
 	}
 
-	public void create() {
-		System.out.println("create");
-
-		if (bookDatabase.contains(this)) {
-			throw new IllegalArgumentException("Book with ISBN already exists.");
-		} else if (!(isValidIsbn(isbn) && isValidTitle(title) && isValidAuthor(author) && isValidPrice(price)
-				&& isValidPublicationDate(publicationDate) && isValidGenre(genre))) {
-			throw new IllegalArgumentException("Invalid attributes provided");
-		}
-
-		else {
-
-			bookDatabase.add(this);
-			System.out.println("New book added: " + this.toString());
-
-		}
-
-	}
-
 	public String update(String title, String author, Double price, LocalDateTime publicationDate, String genre) {
 		System.out.println("update");
 
@@ -193,18 +185,6 @@ public class Book implements Comparable<Book> {
 			this.setGenre(genre);
 
 			return "Book updated.";
-		}
-	}
-
-	public static String delete(String isbnTarget) {
-		System.out.println("delete");
-		Book bookTarget = new Book(isbnTarget);
-
-		if (bookDatabase.contains(bookTarget)) {
-			bookDatabase.remove(bookTarget);
-			return "Book deleted.";
-		} else {
-			return "Book does not exist in book database.";
 		}
 	}
 
@@ -227,8 +207,8 @@ public class Book implements Comparable<Book> {
 
 	@Override
 	public String toString() {
-		return "{\"isbn\":\"" + isbn + "\", \"title\":\"" + title + "\", \"author\":\"" + author + "\", \"price\":\""
-				+ price + "\", \"publicationDate\":\"" + publicationDate + "\", \"genre\":\"" + genre + "\"}";
+		return "Book{" + "isbn='" + isbn + '\'' + ", title='" + title + '\'' + ", author='" + author + '\'' + ", price="
+				+ price + ", publicationDate=" + publicationDate + ", genre='" + genre + '\'' + '}';
 	}
 
 	@Override
@@ -236,9 +216,52 @@ public class Book implements Comparable<Book> {
 		return this.isbn.compareTo(otherBook.isbn);
 	}
 
-	// Static method to access the book database
-	public static TreeSet<Book> getBookDatabase() {
-		return bookDatabase;
+	public static String serializeToJson(Book book) {
+		Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer()).create();
+		return gson.toJson(book);
+	}
+
+	public static String serializeToJson(List<Book> books) {
+		Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer()).create();
+		return gson.toJson(books);
+	}
+
+	public static String serializeToJson(List<Book> books, long totalItems, int limit, int page) {
+		Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer()).create();
+		int totalPages = (int) Math.ceil((double) totalItems / limit);
+		Map<String, Object> dataMap = new LinkedHashMap<>();
+		dataMap.put("page", page);
+		dataMap.put("totalItems", totalItems);
+		dataMap.put("totalPages", totalPages);
+		dataMap.put("data", books);
+
+		return gson.toJson(dataMap);
+	}
+
+	public static Book deserializeFromJson(String json) throws DateTimeParseException {
+		Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeDeserializer())
+				.create();
+		return gson.fromJson(json, Book.class);
+	}
+
+	private static class LocalDateTimeSerializer implements JsonSerializer<LocalDateTime> {
+		private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+		@Override
+		public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
+			return context.serialize(formatter.format(src));
+		}
+	}
+
+	private static class LocalDateTimeDeserializer implements JsonDeserializer<LocalDateTime> {
+		private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+		@Override
+		public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+				throws JsonParseException {
+			String dateTimeString = json.getAsString();
+			return LocalDateTime.parse(dateTimeString, formatter);
+		}
 	}
 
 }
