@@ -64,7 +64,7 @@ Crea un nuevo libro con la siguiente sintaxis:
 - `-g, --genre`: Especifica el género del libro.
 
 Ejemplo de uso:
-java -jar CliMain.jar create -i <isbn> -t <titulo> -a <autor> -p <precio> -d <fechaPublicacion> -g <genero>
+java -jar CliMain.jar create -i isbn -t titulo -a autor -p precio -d fechaPublicacion -g genero
 java -jar CliMain.jar create -i abc -t "Sample Book" -a "John Doe" -p 19.99 -d "2023-09-01T12:00:00" -g "Misterio"
 
 
@@ -75,7 +75,7 @@ Este comando creará un nuevo libro con los detalles proporcionados.
 
 Actualiza un libro existente con la siguiente sintaxis:
 
-java -jar CliMain.jar update -i <isbn> -t <titulo> -a <autor> -p <precio> -d <fechaPublicacion> -g <genero>
+java -jar CliMain.jar update -i isbn -t titulo -a autor -p precio -d fechaPublicacion -g genero
 
 
 Los argumentos son los mismos que para el comando `create`. Este comando actualizará un libro existente con los detalles proporcionados.
@@ -84,7 +84,7 @@ Los argumentos son los mismos que para el comando `create`. Este comando actuali
 
 Lee un libro por su ISBN con la siguiente sintaxis:
 
-java -jar CliMain.jar read -i <isbn>
+java -jar CliMain.jar read -i isbn
 
 
 - `-i, --isbn`: Especifica el ISBN del libro que deseas leer.
@@ -93,7 +93,7 @@ java -jar CliMain.jar read -i <isbn>
 
 Elimina un libro por su ISBN con la siguiente sintaxis:
 
-java -jar CliMain.jar delete -i <isbn>
+java -jar CliMain.jar delete -i isbn
 
 - `-i, --isbn`: Especifica el ISBN del libro que deseas eliminar.
 
