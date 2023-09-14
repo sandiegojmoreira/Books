@@ -8,36 +8,6 @@ Cuando se levanta la API, puedes acceder a los libros a través de la siguiente 
 
 http://localhost:8080/api/books
 
-
-## Formato del Cuerpo JSON
-
-El contenido del cuerpo JSON para crear o actualizar un libro debe seguir el siguiente formato:
-
-```json
-{
-  "isbn": "abc",
-  "title": "Sample Book",
-  "author": "John Doe",
-  "price": 19.99,
-  "publicationDate": "2023-09-01T12:00:00",
-  "genre": "Misterio"
-}
-
-
-Claro, aquí tienes un ejemplo de un archivo README para tu repositorio de GitHub que cumple con las características que mencionaste:
-
-markdown
-Copy code
-# API RESTful de Libros
-
-Este es un proyecto Java creado con Maven que implementa una API RESTful para gestionar una colección de libros. La API proporciona un único recurso llamado "books" que permite realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) en libros.
-
-## URL de la API
-
-Cuando se levanta la API, puedes acceder a los libros a través de la siguiente URL:
-
-http://localhost:8080/api/books
-
 css
 Copy code
 
@@ -45,7 +15,7 @@ Copy code
 
 El contenido del cuerpo JSON para crear o actualizar un libro debe seguir el siguiente formato:
 
-```json
+json
 {
   "isbn": "abc",
   "title": "Sample Book",
@@ -54,6 +24,7 @@ El contenido del cuerpo JSON para crear o actualizar un libro debe seguir el sig
   "publicationDate": "2023-09-01T12:00:00",
   "genre": "Misterio"
 }
+
 Operaciones Disponibles
 La API admite las siguientes operaciones:
 
@@ -137,7 +108,7 @@ java -jar CliMain.jar readall -p 1 -l 10
 
 Ejemplo de uso:
 
-java -jar tu-app.jar readall -p 1 -l 10
+java -jar CliMain.jar readall -p 1 -l 10
 
 Este comando devolverá los primeros 10 libros de la colección en la página 1.
 
